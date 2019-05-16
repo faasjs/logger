@@ -138,7 +138,10 @@ class Log {
       message = `[${this.label}] ${message}`;
     }
     let output = format(message, ...args);
-    output = `\u001b[0${ILevelColor[level as string]}m${level.toUpperCase()} ${output}\u001b[39m`;
+
+    if (process.env.FaasMode !== 'remote') {
+      output = `\u001b[0${ILevelColor[level as string]}m${level.toUpperCase()} ${output}\u001b[39m`;
+    }
 
     this.lastOutput = output;
 
