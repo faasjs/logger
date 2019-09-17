@@ -1,13 +1,8 @@
 import { format } from 'util';
 
-enum ILevel {
-  debug = 'debug',
-  info = 'info',
-  warn = 'warn',
-  error = 'error',
-}
+export type Level = 'debug' | 'info' | 'warn' | 'error';
 
-enum ILevelColor {
+enum LevelColor {
   debug = 34,
   info = 32,
   warn = 33,
@@ -15,9 +10,16 @@ enum ILevelColor {
 }
 
 interface Timer {
-  level: ILevel;
+  level: Level;
   time: number;
 }
+
+const LevelPriority = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3
+};
 
 /**
  * 日志类
@@ -51,7 +53,7 @@ class Log {
    * @param args {...any=} 内容参数
    */
   public debug (message: string, ...args: any[]) {
-    this.log(ILevel.debug, message, ...args);
+    this.log('debug', message, ...args);
     return this;
   }
 
@@ -61,7 +63,7 @@ class Log {
    * @param args {...any=} 内容参数
    */
   public info (message: string, ...args: any[]) {
-    this.log(ILevel.info, message, ...args);
+    this.log('info', message, ...args);
     return this;
   }
 
@@ -71,7 +73,7 @@ class Log {
    * @param args {...any=} 内容参数
    */
   public warn (message: string, ...args: any[]) {
-    this.log(ILevel.warn, message, ...args);
+    this.log('warn', message, ...args);
     return this;
   }
 
@@ -85,12 +87,12 @@ class Log {
     [message].concat(Array.from(args)).forEach((e: any) => {
       if (e.stack) {
         stack = true;
-        this.log(ILevel.error, e.stack);
+        this.log('error', e.stack);
       }
     });
 
     if (!stack) {
-      this.log(ILevel.error, message, ...args);
+      this.log('error', message, ...args);
     }
 
     return this;
@@ -101,7 +103,7 @@ class Log {
    * @param key {string} 计时器标识
    * @param level [string=debug] 日志级别，支持 debug、info、warn、error
    */
-  public time (key: string, level: ILevel = ILevel.debug) {
+  public time (key: string, level: Level = 'debug') {
     this.cachedTimers[key as string] = {
       level,
       time: new Date().getTime(),
@@ -133,19 +135,24 @@ class Log {
     return this;
   }
 
-  private log (level: ILevel, message: string, ...args: any) {
+  private log (level: Level, message: string, ...args: any) {
+    if (process.env.FaasLog) {
+      const priority = LevelPriority[process.env.FaasLog];
+      if (LevelPriority[level as Level] < priority) return;
+    }
+    
     if (this.label) {
       message = `[${this.label}] ${message}`;
     }
     let output = format(message, ...args);
 
     if (process.env.FaasMode !== 'remote') {
-      output = `\u001b[0${ILevelColor[level as string]}m${level.toUpperCase()} ${output}\u001b[39m`;
+      output = `\u001b[0${LevelColor[level as string]}m${level.toUpperCase()} ${output}\u001b[39m`;
     }
 
     this.lastOutput = output;
 
-    if (level === ILevel.error) {
+    if (level === 'error') {
       console.error(output);
     } else {
       console.log(output);

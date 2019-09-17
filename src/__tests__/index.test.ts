@@ -42,4 +42,24 @@ describe('logger', function () {
 
     expect(logger.lastOutput.split('\n')[0]).toEqual('\u001b[031mERROR Error: message');
   });
+
+  test('FaasLog', function(){
+    const logger = new Logger();
+    process.env.FaasLog = 'info';
+    logger.debug('debug');
+
+    expect(logger.lastOutput).toBeUndefined();
+
+    logger.info('info');
+
+    expect(logger.lastOutput).toEqual('\u001b[032mINFO info\u001b[39m');
+
+    logger.warn('warn');
+
+    expect(logger.lastOutput).toEqual('\u001b[033mWARN warn\u001b[39m');
+
+    logger.error('error');
+
+    expect(logger.lastOutput).toEqual('\u001b[031mERROR error\u001b[39m');
+  });
 });

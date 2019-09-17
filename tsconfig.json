@@ -6,8 +6,8 @@
         "types/*"
       ]
     },
-    "target": "es2017",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "declaration": true,
     "outDir": "./lib",
     "strict": true,

@@ -79,10 +79,10 @@
 
 **Kind**: instance method of [<code>Log</code>](#Log)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>string</code> | 计时器标识 |
-| level |  | [string=debug] 日志级别，支持 debug、info、warn、error |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| key | <code>string</code> |  | 计时器标识 |
+| level |  | <code>debug</code> | [string=debug] 日志级别，支持 debug、info、warn、error |
 
 <a name="Log+timeEnd"></a>
 
